@@ -33,7 +33,9 @@ public class Parser {
 
         // Shunting Yard Algorithm
         // Imprime el resultado de operar el input
-        // System.out.println("Resultado: " + this.operandos.peek());
+        if (!operandos.isEmpty()) {
+            System.out.println(operandos.peek());
+        }
 
         // Verifica si terminamos de consumir el input
         if(this.next != this.tokens.size()) {
@@ -48,7 +50,6 @@ public class Parser {
         if(this.next < this.tokens.size() && this.tokens.get(this.next).equals(id)) {
             
             // Codigo para el Shunting Yard Algorithm
-            /*
             if (id == Token.NUMBER) {
 				// Encontramos un numero
 				// Debemos guardarlo en el stack de operandos
@@ -67,7 +68,6 @@ public class Parser {
 				// Que pushOp haga el trabajo, no quiero hacerlo yo aqui
 				pushOp( this.tokens.get(this.next) );
 			}
-			*/
 
             this.next++;
             return true;
@@ -102,14 +102,14 @@ public class Parser {
         	double a = this.operandos.pop();
         	double b = this.operandos.pop();
         	// print para debug, quitarlo al terminar
-        	System.out.println("suma " + a + " + " + b);
-        	this.operandos.push(a + b);
+        	System.out.println("suma " + b + " + " + a);
+        	this.operandos.push(b + a);
         } else if (op.equals(Token.MULT)) {
         	double a = this.operandos.pop();
         	double b = this.operandos.pop();
         	// print para debug, quitarlo al terminar
-        	System.out.println("mult " + a + " * " + b);
-        	this.operandos.push(a * b);
+        	System.out.println("mult " + b + " * " + a);
+        	this.operandos.push(b * a);
         }
     }
 
@@ -127,15 +127,30 @@ public class Parser {
         	// Es posible que necesitemos un ciclo aqui, una vez tengamos varios niveles de precedencia
         	// Al terminar operaciones pendientes, guardamos op en stack
 
+        while (!this.operadores.empty() && pre(op) <= pre(this.operadores.peek())) {
+            popOp();
+        }
+        this.operadores.push(op);
     }
 
+    // S ::= E ;
     private boolean S() {
         return E() && term(Token.SEMI);
     }
 
+    // E ::= number F
     private boolean E() {
-        return false;
+        return term(Token.NUMBER) && F();
     }
 
-    /* TODO: sus otras funciones aqui */
+    // F ::= + E | * E | λ
+    private boolean F() {
+        if (next < tokens.size()) {
+            if (tokens.get(next).equals(Token.PLUS) || tokens.get(next).equals(Token.MULT)) {
+                return term(tokens.get(next).getId()) && E();
+            }
+        }
+        // λ
+        return true;
+    }
 }
